@@ -1,37 +1,40 @@
-'use strict';
-import  galleryItems  from './gallery-items.js';
+"use strict";
+import galleryItems from "./gallery-items.js";
+import { createLi } from "./markup.js";
 
-const createLi = obj => {
-    return `<li class="gallery__item">
-    <a
-      class="gallery__link"
-      href="${obj.preview}"
-    >
-      <img
-        class="gallery__image"
-        src='${obj.original}'
-        data-source='${obj.original}'
-        alt='${obj.description}'
-      />
-    </a>
-  </li>`;
-  };
-  const gallery = galleryItems.reduce((acum, elem) => acum + createLi(elem), '');
+const ulGallery = document.querySelector(".js-gallery");
+const divLightbox = document.querySelector("div.lightbox");
+const imgLightbox = document.querySelector("img.lightbox__image");
+const divOverlay = document.querySelector("div.lightbox__content");
 
-  const ulGallery = document.querySelector(".js-gallery");
-  
-  ulGallery.insertAdjacentHTML("beforeend", gallery);
+const gallery = galleryItems.reduce((acum, elem) => acum + createLi(elem), "");
 
-  ulGallery.addEventListener('click', OpenModal);
+ulGallery.insertAdjacentHTML("beforeend", gallery);
 
-  const divOverlay = document.querySelector('.js-lightbox');
-  const liGalleryItem = document.querySelector('.gallery__item');
-
-  function OpenModal(event) {
-    divOverlay.classList.add('.is-open');
-    event.target.dataset = `${galleryItems.original}`;
-
+const escCloseModal = function(event) {
+  if (event.code === "Escape") {
+    console.dir(event.keyCode);
+    divLightbox.classList.remove("is-open");
+    imgLightbox.src = "";
   }
+};
 
-  
-  
+const openModal = function(event) {
+  event.preventDefault();
+  if (event.target.tagName === "IMG") {
+    divLightbox.classList.add("is-open");
+    imgLightbox.src = event.target.dataset.source;
+    document.addEventListener("keydown", escCloseModal);
+  }
+};
+
+const closeModal = function(event) {
+  if (event.target.tagName === "BUTTON" || event.target === divOverlay) {
+    divLightbox.classList.remove("is-open");
+    imgLightbox.src = "";
+    document.removeEventListener("keydown", escCloseModal);
+  }
+};
+
+ulGallery.addEventListener("click", openModal);
+divLightbox.addEventListener("click", closeModal);
